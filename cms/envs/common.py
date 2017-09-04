@@ -1132,3 +1132,11 @@ PROCTORING_SETTINGS = {}
 
 # OpenID Connect issuer ID. Normally the URL of the authentication endpoint.
 OAUTH_OIDC_ISSUER = 'https://www.example.com/oauth2'
+
+#### Mihara: Hotfix.
+# Apparently, this setting is missing from CMS entirely, which can cause problems
+# No idea how exactly did we not encounter those problems for years, but this should, in theory,
+# set a default. Any default.
+
+DEFAULT_COURSE_ABOUT_IMAGE_URL = 'images/pencils.jpg'
+
