@@ -9,11 +9,16 @@ import datetime
 import json
 import tempfile
 import os
+
+from bson import json_util
+
 from optparse import make_option
 
 from django.core.management.base import BaseCommand, CommandError
 
 from django.contrib.auth.models import User
+
+from django.test.client import RequestFactory
 
 # Why did they have to remove course_about api?!
 
@@ -22,6 +27,8 @@ from xmodule.modulestore.exceptions import ItemNotFoundError
 from student.models import CourseEnrollment, anonymous_id_for_user
 from courseware.grades import iterate_grades_for
 from openedx.core.lib.courses import course_image_url
+
+from course_api.blocks.api import get_blocks
 
 class Command(BaseCommand):
     can_import_settings = True
@@ -97,6 +104,11 @@ class Command(BaseCommand):
             'courses': [],
         }
 
+        # For course TOC we need a user and a request. Find the first superuser defined,
+        # that will be our user.
+        request_user = User.objects.filter(is_superuser=True).first()
+        factory = RequestFactory()
+
         for course in store.get_courses():
 
             course_id_string = course.id.to_deprecated_string()
@@ -115,6 +127,47 @@ class Command(BaseCommand):
 
             students = CourseEnrollment.objects.users_enrolled_in(course.id)
 
+            # The method of getting a table of contents for a course is quite obtuse.
+            # We have to go all the way to simulating a request.
+
+            request = factory.get('/')
+            request.user = request_user
+
+            raw_blocks = get_blocks(request, store.make_course_usage_key(course.id), request_user, 
+                                requested_fields=['id', 'type', 'display_name', 'children', 'lms_web_url'])
+
+            # We got the block structure. Now we need to massage it so we get the proper jump urls without site domain.
+            # Because on the test server the site domain is wrong.
+            blocks = {}
+            for block_key, block in raw_blocks['blocks'].items():
+                try:
+                    direct_url = '/courses/' + block.get('lms_web_url').split('/courses/')[1]
+                except IndexError:
+                    direct_url = ''
+                blocks[block_key] = {
+                    'id': block.get('id', ''),
+                    'display_name': block.get('display_name', ''),
+                    'type': block.get('type', ''),
+                    'children_ids': block.get('children', []),
+                    'url': direct_url
+                }
+
+            # Then we need to recursively stitch it into a tree.
+            # We're only interested in three layers of the hierarchy for now: 'course', 'chapter', 'sequential', 'vertical'.
+            # Everything else is the individual blocks and problems we don't care about right now.
+
+            INTERESTING_BLOCKS = ['course', 'chapter', 'sequential', 'vertical']
+
+            def _get_children(parent):
+                children = [blocks.get(n) for n in parent['children_ids'] if blocks.get(n)] # and blocks.get(n)['type'] in INTERESTING_BLOCKS]
+                for child in children:
+                    child['children'] = _get_children(child)
+                parent['children'] = children
+                del parent['children_ids']
+                return children
+
+            block_tree = _get_children(blocks[raw_blocks['root']])
+
             course_block = {
               'id': course_id_string,
               'meta_data': {
@@ -124,6 +177,7 @@ class Command(BaseCommand):
                         'course_image': course_image_url(course),
                     }
                 },
+                'block_tree': block_tree,
                 # Yes, I'm duplicating them for now, because the about section is shot.
                 'display_name': course.display_name,
                 'banner': course_image_url(course),
@@ -173,9 +227,9 @@ class Command(BaseCommand):
         if options['output']:
             # Ensure the dump is atomic.
             with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(options['output']), delete=False) as output_file:
-                json.dump(blob, output_file)
+                json.dump(blob, output_file, default=json_util.default)
                 tempname = output_file.name
             os.rename(tempname, options['output'])
         else:
             print "Blob output:"
-            print json.dumps(blob, indent=2, ensure_ascii=False)
+            print json.dumps(blob, indent=2, ensure_ascii=False, default=json_util.default)
