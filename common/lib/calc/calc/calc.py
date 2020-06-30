@@ -242,8 +242,11 @@ def evaluator(variables, functions, math_expr, case_sensitive=False):
     if math_expr.strip() == "":
         return float('nan')
 
+    # Mihara: Dirty hack to ensure that users who use , as a decimal separator still get correct answers.
+    math_expr_c = math_expr.replace('\,','#COMMA#').replace(',','.').replace('#COMMA#','\,')
+
     # Parse the tree.
-    math_interpreter = ParseAugmenter(math_expr, case_sensitive)
+    math_interpreter = ParseAugmenter(math_expr_c, case_sensitive)
     math_interpreter.parse_algebra()
 
     # Get our variables together.

@@ -363,8 +363,11 @@ def latex_preview(math_expr, variables=(), functions=(), case_sensitive=False):
     if math_expr.strip() == "":
         return ""
 
+    # Mihara: Dirty hack to ensure that users who use , as a decimal separator still get correct answers.
+    math_expr_c = math_expr.replace('\,','#COMMA#').replace(',','.').replace('#COMMA#','\,')
+
     # Parse tree
-    latex_interpreter = ParseAugmenter(math_expr, case_sensitive)
+    latex_interpreter = ParseAugmenter(math_expr_c, case_sensitive)
     latex_interpreter.parse_algebra()
 
     # Get our variables together.
