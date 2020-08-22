@@ -7,6 +7,16 @@ from opaque_keys.edx.keys import UsageKey
 from courseware.models import StudentModule
 from django.core.management.base import BaseCommand, CommandError
 
+
+class UnexpectedBehavior(Exception):
+    def __init__(self, message, problem_id, username):
+        self.message = 'problem: "{id}", username: {user}. Error: {mes}'.format(
+            id=problem_id, user=username, mes=message)
+
+    def __str__(self):
+        return self.message
+
+
 class Command(BaseCommand):
     help = 'get statistics for a specific problem'
 
@@ -41,9 +51,22 @@ class Command(BaseCommand):
                 state = json.loads(m.state)
                 def encode(u):
                     return u.encode('utf-8')
-                answers = state.get('student_answers', {})
-                answers = {key: map(encode, val) if type(val) == list else encode(val)
-                              for key, val in zip(answers.keys(), answers.values())}
+                state_answers = state.get('student_answers', {})
+                # keys - strings like 'c7f3c7825d5b496ab33c962f39de234b_2_1', where '2' is field index (from 2)
+                # i take this number and convert to int to normal sorting (when problem has more that 9 fields)
+                answers = {}
+                for key in state_answers.keys():
+                    val = state_answers[key]
+                    key = int(key.split('_')[1])
+                    answers[key] = map(encode, val) if type(val) == list else encode(val)
+                # i hope it will be false every time...
+                if len(answers) != len(state_answers):
+                    # panic! for some unexpected reason several `state_answers` values wrote to one `answers` value!
+                    raise UnexpectedBehavior(
+                        'different answers hit the same column',
+                        options['problem'],
+                        m.student.username
+                    )
                 # we think that someone answer all the questions
                 if len(answers) > len(questions):
                     questions |= set(answers.keys())
@@ -66,13 +89,13 @@ class Command(BaseCommand):
                 quoting=csv.QUOTE_ALL
             )
             writer.writeheader()
-            for d, answers in queue:
+            for csv_dict, answers in queue:
                 for id in answers:
                     index = questions[id]
-                    d['question_{}'.format(index)] = answers[id]
+                    csv_dict['question_{}'.format(index)] = answers[id]
 
-                print u' write {} in file'.format(d['email'])
-                writer.writerow(d)
+                print u' write {} in file'.format(csv_dict['email'])
+                writer.writerow(csv_dict)
             tempname = output_file.name
         os.rename(tempname, filename)
         print u'now filename is {}'.format(filename)

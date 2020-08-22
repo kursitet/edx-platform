@@ -7,7 +7,7 @@ def _run(file):
     exclude = ['username', 'email', 'max_grade']
 
     reader = csv.DictReader(file)
-    fields = list(filter(lambda f: f not in exclude, reader.fieldnames))
+    fields = [f for f in reader.fieldnames if f not in exclude]
 
     counts = {}
     for f in fields:
