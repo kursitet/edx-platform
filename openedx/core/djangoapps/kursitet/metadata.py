@@ -5,6 +5,7 @@ Common functionality used to extract the data kursitet wants.
 """
 
 import datetime
+import time
 from django.contrib.auth.models import User
 from django.test.client import RequestFactory
 from student.models import CourseEnrollment, anonymous_id_for_user
@@ -28,6 +29,7 @@ def get_student_grades(course, graded_students):
             grade = CourseGradeFactory().create(student, course)
             data_block.append({
                 'username': student.username,
+                'epoch': int(time.time()),
                 'grades': {
                     'grade': grade.letter_grade,
                     'percent': grade.percent,
