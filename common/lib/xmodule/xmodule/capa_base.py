@@ -1374,7 +1374,7 @@ class CapaMixin(ScorableXBlockMixin, CapaFields):
         if hours > 0:
             display += u"{} {}".format(hours, rus_plural(hours, u"час", u"часа", u"часов"))
         if minutes > 0:
-            if display != ""
+            if display != "":
                 display += " "
             display += u"{} {}".format(minutes, rus_plural(minutes, u"минута", u"минуты", u"минут"))
         if seconds > 0 or (hours == 0 and minutes == 0):
