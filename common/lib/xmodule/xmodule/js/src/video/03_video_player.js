@@ -467,6 +467,7 @@ function(HTML5Video, HTML5HLSVideo, Resizer, HLS, _) {
             // finish bufferization and then rewind the video.
             if (this.isYoutubeType() && this.videoPlayer.isBuffering()) {
                 this.el.on('play.seek', function() {
+                    this.el.off('play.seek');
                     this.videoPlayer.player.seekTo(time, true);
                 }.bind(this));
             } else {
