@@ -1380,7 +1380,7 @@ class CapaMixin(ScorableXBlockMixin, CapaFields):
         if seconds > 0 or (hours == 0 and minutes == 0):
             if display != "":
                 display += " "
-            display += u"{} {}".format(seconds, rus_plural(seconds, u"секунду", u"секунды", u"секунд"))
+            display += u"{} {}".format(seconds, rus_plural(seconds, u"секунда", u"секунды", u"секунд"))	
 
         return display
         # Mihara: Now the rest of this function is dead code.
