@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Implements basics of Capa, including class CapaModule."""
 import cgi
 import copy
