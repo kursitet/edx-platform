@@ -2508,8 +2508,8 @@ msgid ""
 "You must wait at least {wait_secs} between submissions. {remaining_secs} "
 "remaining."
 msgstr ""
-"Подождите по крайней мере {wait_secs} между попытками. Осталось "
-"{remaining_secs} . "
+"Между попытками ответов установлена задержка в {wait_secs}. "
+"Вы сможете отправить новый ответ через {remaining_secs}."
 
 #: common/lib/xmodule/xmodule/capa_base.py
 #, python-brace-format
