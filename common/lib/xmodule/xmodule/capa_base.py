@@ -1359,6 +1359,31 @@ class CapaMixin(ScorableXBlockMixin, CapaFields):
         minutes = sub_hour // 60
         seconds = sub_hour % 60
         display = ""
+
+        # Mihara: This logic is incompatible with Russian: ungettext only gives a singular/plural option,
+        # while Russian uses more than one plural for numbers. This needs to be hardcoded.
+        # It breaks compatibility with other languages, but we don't care anymore.
+        def rus_plural(num, one, two, five):
+            if num % 10 in (5, 6, 7, 8, 9, 0) or 11 <= num % 100 <= 19:
+                return five
+            elif num % 10 == 1:
+                return one
+            return two
+
+        if hours > 0:
+            display += u"{} {}".format(hours, rus_plural(hours, u"час", u"часа", u"часов")
+        if minutes > 0:
+            if display != ""
+                display += " "
+            display += u"{} {}".format(minutes, rus_plural(minutes, u"минута", u"минуты", u"минут")
+        if seconds > 0 or (hours == 0 and minutes == 0):
+            if display != "":
+                display += " "
+            display += u"{} {}".format(seconds, rus_plural(seconds, u"секунда", u"секунды", u"секунд")
+
+        return display
+        # Mihara: Now the rest of this function is dead code.
+
         if hours > 0:
             display += ungettext("{num_hour} hour", "{num_hour} hours", hours).format(num_hour=hours)
         if minutes > 0:
