@@ -2508,7 +2508,7 @@ msgid ""
 "You must wait at least {wait_secs} between submissions. {remaining_secs} "
 "remaining."
 msgstr ""
-"Установленный интервал между попытками: {wait_secs}. "
+"Установленный интервал между попытками: {wait_secs}. <br>"
 "До следующей попытки: {remaining_secs}."
 
 #: common/lib/xmodule/xmodule/capa_base.py
