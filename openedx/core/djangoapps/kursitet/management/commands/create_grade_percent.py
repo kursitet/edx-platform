@@ -8,6 +8,7 @@ from django.core.management.base import BaseCommand
 
 from .course_unit_csv_stats import get_block_id_from_location, get_course_struct, Block
 from .get_problem_csv_stats import get_modules
+from ...csv_analyze.column_filter import column_filter
 
 
 class Command(BaseCommand):
@@ -75,5 +76,8 @@ class Command(BaseCommand):
                     )
                 ])
             actual_filename = file.name
+
+        column_filter(actual_filename, block.id)
+
         os.rename(actual_filename, options['output'])
         print u'grade_percent successfully created! Look in {}'.format(options['output'])
