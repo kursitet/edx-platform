@@ -42,6 +42,6 @@ if (typeof MathJax === 'undefined') {
             });
         };
     };
-    vendorScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_SVG&locale=ru';
+    vendorScript.src = 'https://lms.dppo.edu.ru/mathjax/MathJax-2.7.7/MathJax.js?config=TeX-MML-AM_SVG&locale=ru';
     document.body.appendChild(vendorScript);
 }
