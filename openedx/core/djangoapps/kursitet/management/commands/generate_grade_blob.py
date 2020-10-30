@@ -46,6 +46,7 @@ class Command(BaseCommand):
         make_option(
             '-u',
             '--userlist',
+            dest='userlist_file',
             metavar='USERLIST_FILE',
             default=False,
             help='List of users to limit the grade dump to. Optional.'),
