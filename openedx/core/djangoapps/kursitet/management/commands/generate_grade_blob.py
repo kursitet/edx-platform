@@ -44,6 +44,12 @@ class Command(BaseCommand):
             default=False,
             help='Name of the list of included courses. Optional'),
         make_option(
+            '-u',
+            '--userlist',
+            metavar='USERLIST_FILE',
+            default=False,
+            help='List of users to limit the grade dump to. Optional.'),
+        make_option(
             '-c',
             '--course',
             metavar='SINGLE_COURSE',
@@ -62,12 +68,13 @@ class Command(BaseCommand):
 
         exclusion_list = []
         inclusion_list = []
+        user_list = []
 
         if options['exclude_file']:
             try:
                 with open(options['exclude_file'], 'rb') as exclusion_file:
                     data = exclusion_file.readlines()
-                exclusion_list = [x.strip() for x in data]
+                exclusion_list = [x.strip() for x in data if x.strip()]
             except IOError:
                 raise CommandError("Could not read exclusion list from '{0}'".
                                    format(options['exclude_file']))
@@ -76,10 +83,19 @@ class Command(BaseCommand):
             try:
                 with open(options['include_file'], 'rb') as inclusion_file:
                     data = inclusion_file.readlines()
-                inclusion_list = [x.strip() for x in data]
+                inclusion_list = [x.strip() for x in data if x.strip()]
             except IOError:
                 raise CommandError("Could not read inclusion list from '{0}'".
                                    format(options['include_file']))
+
+        if options['userlist_file']:
+            try:
+                with open(options['userlist_file'], 'rb') as userlist_file:
+                    data = userlist_file.readlines()
+                user_list = [x.strip() for x in data if x.strip()]
+            except IOError:
+                raise CommandError("Could not read user list from '{0}'".
+                                   format(options['userlist_file']))
 
         store = modulestore()
         epoch = int(time.time())
@@ -105,7 +121,7 @@ class Command(BaseCommand):
             print "Processing {}".format(course_id_string)
 
             course_block = get_course_block(
-                course, get_grades=not options['meta_only'])
+                course, get_grades=not options['meta_only'], user_list=user_list or None)
             if not options['meta_only']:
                 blob['grading_data_epoch'] = epoch
             blob['courses'].append(course_block)

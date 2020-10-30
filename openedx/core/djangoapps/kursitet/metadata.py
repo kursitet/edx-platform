@@ -16,7 +16,7 @@ from xmodule.modulestore.exceptions import ItemNotFoundError
 from course_api.blocks.api import get_blocks
 
 
-def get_student_grades(course, graded_students):
+def get_student_grades(course, graded_students, user_list=None):
     """
     Return all the student grades for a given course.
     Expects a course object rather than a course locator.
@@ -26,6 +26,8 @@ def get_student_grades(course, graded_students):
 
     if graded_students.count():
         for student in graded_students:
+            if user_list and student.username not in user_list:
+                continue
             grade = CourseGradeFactory().create(student, course)
             data_block.append({
                 'username': student.username,
@@ -39,7 +41,7 @@ def get_student_grades(course, graded_students):
     return data_block
 
 
-def get_course_block(course, get_grades=False):
+def get_course_block(course, get_grades=False, user_list=None):
     """
     Return a blob of course metadata the way kursitet likes it.
     Expects a course object rather than a course locator.
@@ -184,7 +186,7 @@ def get_course_block(course, get_grades=False):
     }
 
     if get_grades:
-        course_block['grading_data'] = get_student_grades(course, students)
+        course_block['grading_data'] = get_student_grades(course, students, user_list=user_list)
 
     return course_block
 
