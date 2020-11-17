@@ -7,14 +7,14 @@
         }
     %>
     <div class='exam-text'>
-        <%= interpolate_text('Экзамен "{exam_link}" сдаётся как экзамен {exam_type}. Таймер справа показывает оставшееся для сдачи время.', {exam_link: "<a href='" + exam_url_path + "'>"+gtLtEscape(exam_display_name)+"</a>", exam_type: (!_.isUndefined(arguments[0].exam_type)) ? exam_type : gettext('timed')}) %>
-        <%- gettext('To receive credit for problems, you must select "Submit" for each problem before you select "End My Exam".') %>
+        Таймер справа показывает, сколько времени осталось до конца тестирования. Как только время закончится, система автоматически отправит на проверку те ответы, под которыми вы нажали кнопку «Отправить».<br>
+        Чтобы завершить тестирование досрочно, можно нажать кнопку «Завершить тестирование». Прежде чем нажать её, ещё раз проверьте, что вы нажали кнопку «Отправить» под каждым заданием.
     </div>
     <div id="turn_in_exam_id" class="pull-right turn_in_exam">
         <span>
             <% if(attempt_status !== 'ready_to_submit') {%>
                 <button class="exam-button-turn-in-exam btn btn-pl-primary">
-                    <%- gettext("End My Exam") %>
+                    Завершить тестирование
                 </button>
             <% } %>
         </span>
